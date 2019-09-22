@@ -1,38 +1,51 @@
-import React, {useEffect} from 'react';
-import logo from './logo.svg';
+import React, {useEffect, useState} from 'react';
 import './App.css';
+import {addTodo, getTodos, deleteTodo, updateTodo} from "./todoApi";
+import TodoFormView from "./TodoForm";
+import TodoListView from "./TodoList";
 
-const API_URL = process.env.REACT_APP_API_URL;
 
 function App() {
 
+    const [todos, setTodos] = useState([]);
+
     useEffect(() => {
-        async function f() {
-            const res = await fetch(API_URL);
-            const data = await res.json();
-
-            console.log("data", data);
-        }
-
-        f();
+        handleGetTodos();
 
     }, []);
+
+    async function handleGetTodos() {
+        const todos = await getTodos();
+        console.log("todos", todos);
+        setTodos(todos);
+    }
+
+    async function handleAddTodo(title) {
+        await addTodo(title);
+        await handleGetTodos();
+    }
+
+    async function handleDelete(id) {
+        await deleteTodo(id);
+        await handleGetTodos();
+    }
+
+    async function handleUpdate({id, completed}) {
+        await updateTodo(id, {completed});
+        await handleGetTodos();
+    }
 
     return (
         <div className="App">
             <header className="App-header">
-                <img src={logo} className="App-logo" alt="logo"/>
-                <p>
-                    Edit <code>src/App.js</code> and save to reload.
-                </p>
-                <a
-                    className="App-link"
-                    href="https://reactjs.org"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                >
-                    Learn React I
-                </a>
+                <TodoFormView
+                    addTodo={handleAddTodo}
+                />
+                <TodoListView
+                    todos={todos}
+                    handleDelete={handleDelete}
+                    handleUpdate={handleUpdate}
+                />
             </header>
         </div>
     );
